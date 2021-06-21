@@ -33,10 +33,10 @@
 
 px4_add_module(
 	MODULE examples__px4_robotis_servo
-	MAIN px4_robotis_servo_main
+	MAIN px4_robotis_servo
+	STACK_MAIN 2000
 	SRCS
 		px4_robotis_servo.cpp
 		px4_robotis_servo.hpp
 	DEPENDS
-	DYNAMIC
 	)

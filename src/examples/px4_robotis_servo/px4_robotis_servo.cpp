@@ -37,6 +37,7 @@
 // px4_config and posix are needed for just about every PX4 user application.
 #include <px4_platform_common/px4_config.h>
 #include <px4_platform_common/posix.h>
+#include <px4_platform_common/log.h>
 #include <px4_platform_common/defines.h>
 
 #include <drivers/drv_hrt.h>
