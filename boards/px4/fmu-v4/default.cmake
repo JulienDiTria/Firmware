@@ -119,7 +119,7 @@ px4_add_board(
 		ver
 		work_queue
 	EXAMPLES
-		fake_gps
+		#fake_gps
 		#fake_imu
 		#fake_magnetometer
 		#fixedwing_control # Tutorial code from https://px4.io/dev/example_fixedwing_control
@@ -131,4 +131,5 @@ px4_add_board(
 		#rover_steering_control # Rover example app
 		#uuv_example_app
 		#work_item
+		px4_robotis_servo
 	)

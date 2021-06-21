@@ -40,6 +40,10 @@
 #include <px4_platform_common/log.h>
 #include <px4_platform_common/defines.h>
 
+#ifndef MIN
+#  define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
 #include <drivers/drv_hrt.h>
 #include <termios.h>
 
@@ -129,13 +133,10 @@ const AP_Param::GroupInfo px4_robotis_servo::var_info[] = {
 */
 
 // Export main function so that we can call on it in PX4
-__EXPORT int px4_robotis_servo_main(int argc, char *argv[]);
+extern "C" __EXPORT int px4_robotis_servo_main(int argc, char *argv[]);
 
 static int robotis_open_uart(const char *uart_name, struct termios *uart_config, struct termios *uart_config_original);
 static void set_uart_single_wire(int uart, bool single_wire);
-
-/* Default values for arguments */
-const char *device_name = NULL;
 
 /*
 Very useful introduction
@@ -214,7 +215,7 @@ px4_robotis_servo::px4_robotis_servo(void)
 
 void px4_robotis_servo::init(void)
 {
-	device_name = "/dev/ttyS6"; /* default USART8 */
+	const char* device_name = "/dev/ttyS6"; /* default USART8 */
 
 	/* Open UART */
 	struct termios uart_config_original;
@@ -546,20 +547,20 @@ void px4_robotis_servo::update()
     }
 
     // loop for all 16 channels
-    for (uint8_t i=0; i<PWM_OUTPUT_MAX_CHANNELS; i++) {
+    //for (uint8_t i=0; i<PWM_OUTPUT_MAX_CHANNELS; i++) {
+    for (uint8_t i=0; i<16; i++) {
         if (((1U<<i) & servo_mask) == 0) {
             continue;
         }
-        // get radio channel in
-	// for now use one turn looping
-
+        // todo : get radio channel in
+	    // for now use one turn looping on pos
         send_command(i+1, REG_GOAL_POSITION, pos, 4);
     }
 }
 
 
 int px4_robotis_servo_main(int argc, char *argv[]){
-	px4_robotis_servo servo = px4_robotis_servo();
+	px4_robotis_servo servo;
 
 	while(true){
 		servo.update();
