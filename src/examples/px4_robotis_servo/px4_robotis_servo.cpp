@@ -149,9 +149,10 @@ static int robotis_open_uart(const char *uart_name, struct termios *uart_config,
 
 	if (uart < 0) {
 		PX4_ERR("Error opening port: %s (%i)", uart_name, errno);
+        PX4_INFO("UART port error");
 		return -1;
 	}
-
+    PX4_INFO("UART open success");
 	/* Back up the original UART configuration to restore it after exit */
 	int termios_state;
 
@@ -232,6 +233,7 @@ void px4_robotis_servo::init(void)
 		device_name = NULL;
 		return;
 	}
+
 	set_uart_single_wire(uart, true);
 
 	if (uart) {
@@ -504,8 +506,9 @@ void px4_robotis_servo::process_packet(const uint8_t *pkt, uint8_t length)
 
 void px4_robotis_servo::update()
 {
-	PX4_INFO("px4_robotis_servo::update");
+	//PX4_INFO("px4_robotis_servo::update");
 
+    //PX4_INFO("if (!initialised) {");
     if (!initialised) {
         initialised = true;
         init();
@@ -513,15 +516,17 @@ void px4_robotis_servo::update()
         return;
     }
 
+    //PX4_INFO("if (uart < 0)");
     if (uart < 0) {
         return;
     }
 
+    //PX4_INFO("read_bytes();");
     read_bytes();
 
     const hrt_abstime now = hrt_absolute_time();
     if (last_send_us != 0 && now - last_send_us < delay_time_us) {
-        // waiting for last send to complete
+        PX4_INFO("last_send_us != 0 && now - last_send_us < delay_time_us");
         return;
     }
 
@@ -531,6 +536,7 @@ void px4_robotis_servo::update()
     }
 
     if (servo_mask == 0) {
+        PX4_INFO("servo_mask == 0");
         return;
     }
 
@@ -538,6 +544,7 @@ void px4_robotis_servo::update()
         configured_servos++;
         last_send_us = now;
         configure_servos();
+        PX4_INFO("configured_servos < CONFIGURE_SERVO_COUNT");
         return;
     }
 
