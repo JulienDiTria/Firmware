@@ -215,6 +215,7 @@ px4_robotis_servo::px4_robotis_servo(void)
 
 void px4_robotis_servo::init(void)
 {
+    PX4_INFO("px4_robotis_servo::init on ttyS2");
 	const char* device_name = "/dev/ttyS2"; /* default USART3	/dev/ttyS2	TELEM2 */
 
 	/* Open UART */
@@ -233,6 +234,7 @@ void px4_robotis_servo::init(void)
 		us_per_byte = 10 * 1e6 / baudrate;
 		us_gap = 4 * 1e6 / baudrate;
 	}
+    PX4_INFO("px4_robotis_servo::init done");
 }
 
 /*
@@ -560,6 +562,7 @@ void px4_robotis_servo::update()
 
 
 int px4_robotis_servo_main(int argc, char *argv[]){
+	PX4_INFO("px4_robotis_servo_main starting");
 	px4_robotis_servo servo;
 
 	while(true){
