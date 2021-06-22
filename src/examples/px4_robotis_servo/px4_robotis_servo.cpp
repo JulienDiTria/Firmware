@@ -210,7 +210,12 @@ px4_robotis_servo::px4_robotis_servo(void)
 {
     // set defaults from the parameter table
     // AP_Param::setup_object_defaults(this, var_info);
-    init();
+    if (!initialised) {
+        initialised = true;
+        init();
+        last_send_us = hrt_absolute_time();
+        return;
+    }
 }
 
 void px4_robotis_servo::init(void)
@@ -499,6 +504,8 @@ void px4_robotis_servo::process_packet(const uint8_t *pkt, uint8_t length)
 
 void px4_robotis_servo::update()
 {
+	PX4_INFO("px4_robotis_servo::update");
+	
     if (!initialised) {
         initialised = true;
         init();
