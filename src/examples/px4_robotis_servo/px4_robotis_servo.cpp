@@ -215,7 +215,7 @@ px4_robotis_servo::px4_robotis_servo(void)
 
 void px4_robotis_servo::init(void)
 {
-	const char* device_name = "/dev/ttyS6"; /* default USART8 */
+	const char* device_name = "/dev/ttyS2"; /* default USART3	/dev/ttyS2	TELEM2 */
 
 	/* Open UART */
 	struct termios uart_config_original;
