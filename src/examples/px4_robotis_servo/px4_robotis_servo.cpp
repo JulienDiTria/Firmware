@@ -133,11 +133,17 @@ const AP_Param::GroupInfo px4_robotis_servo::var_info[] = {
 };
 */
 
+/* thread state */
+static volatile bool thread_should_exit = false;
+static volatile bool thread_running = false;
+static int robotis_servo_task;
+
 // Export main function so that we can call on it in PX4
 extern "C" __EXPORT int px4_robotis_servo_main(int argc, char *argv[]);
 
 static int robotis_open_uart(const char *uart_name, struct termios *uart_config, struct termios *uart_config_original);
 static void set_uart_single_wire(int uart, bool single_wire);
+static void usage(void);
 
 /*
 Very useful introduction
@@ -223,27 +229,37 @@ px4_robotis_servo::px4_robotis_servo(void)
 void px4_robotis_servo::init(void)
 {
     PX4_INFO("px4_robotis_servo::init on ttyS2");
-	const char* device_name = "/dev/ttyS2"; /* default USART3	/dev/ttyS2	TELEM2 */
+	strncpy(device_name, "/dev/ttyS2", 15); /* default USART3	/dev/ttyS2	TELEM2 */
 
 	/* Open UART */
-	struct termios uart_config_original;
 	struct termios uart_config;
 	uart = robotis_open_uart(device_name, &uart_config, &uart_config_original);
 
 	if (uart < 0) {
-		device_name = NULL;
+		memset(device_name, '\0', 16);
 		return;
 	}
 
 	set_uart_single_wire(uart, true);
 
-	if (uart) {
+	if (uart>0) {
 		baudrate = 57600;
 		us_per_byte = 10 * 1e6 / baudrate;
 		us_gap = 4 * 1e6 / baudrate;
         PX4_INFO("baudrate %u, us_per_byte %u, us_gap %u" , baudrate, us_per_byte, us_gap);
 	}
     PX4_INFO("px4_robotis_servo::init done");
+}
+
+void px4_robotis_servo::stop(){
+
+    /* Reset the UART flags to original state */
+	tcsetattr(uart, TCSANOW, &uart_config_original);
+
+    // then close uart
+    close(uart);
+
+	memset(device_name, '\0', 16);
 }
 
 /*
@@ -579,13 +595,98 @@ void px4_robotis_servo::update()
     }
 }
 
-
-int px4_robotis_servo_main(int argc, char *argv[]){
-	PX4_INFO("px4_robotis_servo_main starting");
+/**
+ * The daemon thread.
+ */
+static int robotis_servo_thread_main(int argc, char *argv[])
+{
+    PX4_INFO("robotis_servo_thread_main starting");
 	px4_robotis_servo servo;
 
-	while(true){
+	while (!thread_should_exit){
 		servo.update();
         px4_usleep(10000);
 	}
+
+    servo.stop();
+
+	thread_running = false;
+    return 0;
+}
+
+int px4_robotis_servo_main(int argc, char *argv[]){
+
+	if (argc < 2) {
+		PX4_ERR("missing command");
+		usage();
+		return -1;
+	}
+
+	if (!strcmp(argv[1], "start")) {
+
+		if (thread_running) {
+			PX4_INFO("px4_robotis_servo already running");
+			return 0;
+		}
+
+		thread_should_exit = false;
+		robotis_task = px4_task_spawn_cmd("px4_robotis_servo",
+						SCHED_DEFAULT,
+						SCHED_PRIORITY_DEFAULT + 4,
+						1400,
+						robotis_servo_thread_main,
+						(char *const *)argv);
+
+		while (!thread_running) {
+			usleep(200);
+		}
+
+		return 0;
+	}
+
+	if (!strcmp(argv[1], "stop")) {
+
+		if (!thread_running) {
+			PX4_WARN("px4_robotis_servo already stopped");
+			return 0;
+		}
+
+		thread_should_exit = true;
+
+		while (thread_running) {
+			usleep(1000000);
+			PX4_INFO(".");
+		}
+
+		PX4_INFO("terminated.");
+		return 0;
+	}
+
+	if (!strcmp(argv[1], "status")) {
+		if (thread_running) {
+            PX4_INFO("running");
+			return 0;
+
+		} else {
+			PX4_INFO("not running");
+			return 0;
+		}
+	}
+
+	PX4_ERR("unrecognized command");
+	usage();
+	return 0;
+}
+
+/**
+ * Print command usage information
+ */
+static void usage()
+{
+	PRINT_MODULE_DESCRIPTION("Robotis Servo support.");
+
+	PRINT_MODULE_USAGE_NAME("px4_robotis_servo", "communication");
+	PRINT_MODULE_USAGE_COMMAND("start");
+	PRINT_MODULE_USAGE_COMMAND("stop");
+	PRINT_MODULE_USAGE_COMMAND("status");
 }

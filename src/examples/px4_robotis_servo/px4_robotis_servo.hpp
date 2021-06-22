@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <drivers/drv_hrt.h>
+#include <termios.h>
+
 class px4_robotis_servo {
 public:
     px4_robotis_servo();
@@ -27,6 +30,7 @@ public:
     px4_robotis_servo &operator=(const px4_robotis_servo&) = delete;
 
     void update();
+    void stop();
 
 private:
     int uart;
@@ -64,4 +68,7 @@ private:
 
     hrt_abstime last_send_us;
     hrt_abstime delay_time_us;
+
+    char device_name[16];
+    struct termios uart_config_original;
 };
