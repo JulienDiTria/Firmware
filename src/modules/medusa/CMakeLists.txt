@@ -36,5 +36,6 @@ px4_add_module(
 	MAIN medusa
 	SRCS
 		medusa.cpp
+		medusa.hpp
 	)
 

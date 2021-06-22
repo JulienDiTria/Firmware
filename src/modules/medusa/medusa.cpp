@@ -31,7 +31,7 @@
  *
  ****************************************************************************/
 
-#include "template_module.h"
+#include "medusa.hpp"
 
 #include <px4_platform_common/getopt.h>
 #include <px4_platform_common/log.h>
@@ -40,6 +40,7 @@
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/sensor_combined.h>
 
+extern "C" __EXPORT int medusa_main(int argc, char *argv[]);
 
 int Medusa::print_status()
 {
@@ -96,28 +97,26 @@ Medusa *Medusa::instantiate(int argc, char *argv[])
 	return instance;
 }
 
-Medusa::Medusa()
-	: ModuleParams(nullptr)
+Medusa::Medusa(): ModuleParams(nullptr)
 {
 }
 
 void Medusa::run()
 {
 	// Subscirbe to "vehicle_status", then set a polling interval of 200ms
-    int vehicle_status_sub = orb_subscribe(ORB_ID(vehicle_status));
-    int vehicle_land_detected_sub = orb_subscribe(ORB_ID(vehicle_land_detected));
-    int rc_channels_sub = orb_subscribe(ORB_ID(rc_channels));
-	
+	int vehicle_status_sub = orb_subscribe(ORB_ID(vehicle_status));
+	int vehicle_land_detected_sub = orb_subscribe(ORB_ID(vehicle_land_detected));
+	int rc_channels_sub = orb_subscribe(ORB_ID(rc_channels));
+
 	orb_set_interval(vehicle_status_sub, 200);
 	orb_set_interval(vehicle_land_detected_sub, 200);
 	orb_set_interval(rc_channels_sub, 200);
-	
-	px4_pollfd_struct_t fds[] = {
-        { .fd = vehicle_status_sub,   .events = POLLIN },
-        { .fd = vehicle_land_detected_sub,   .events = POLLIN },
-        { .fd = rc_channels_sub,   .events = POLLIN },
 
-    };
+	px4_pollfd_struct_t fds[] = {
+		{ .fd = vehicle_status_sub,   .events = POLLIN },
+		{ .fd = vehicle_land_detected_sub,   .events = POLLIN },
+		{ .fd = rc_channels_sub,   .events = POLLIN },
+	};
 
 	// initialize parameters
 	parameters_update(true);
@@ -149,16 +148,15 @@ void Medusa::run()
 				orb_copy(ORB_ID(rc_channels), rc_channels_sub, &_rc_channels);
 				PX4_INFO("received _rc_channels");
 			}
-			
+
 			//sm_update();
 		}
-
 		parameters_update();
 	}
 
-	orb_unsubscribe(sensor_combined_sub);
+	orb_unsubscribe(vehicle_status_sub);
 	orb_unsubscribe(vehicle_land_detected_sub);
-    orb_unsubscribe(rc_channels_sub);
+    	orb_unsubscribe(rc_channels_sub);
 }
 
 void Medusa::parameters_update(bool force)
@@ -184,10 +182,10 @@ int Medusa::print_usage(const char *reason)
 		R"DESCR_STR(
 ### Description
 
-This is a medusa module running as a task in the background with start/stop/status functionality.
+This is the medusa module running as a task in the background with start/stop/status functionality.
 
 ### Implementation
-Section describing the high-level implementation of this module.
+It determines the state of the medusa pod and coiler to make the pod active and handling the coiling and uncoiling.
 
 ### Examples
 CLI usage example:
@@ -202,7 +200,7 @@ $ module start
 	return 0;
 }
 
-int medusa_module_main(int argc, char *argv[])
+int medusa_main(int argc, char *argv[])
 {
 	return Medusa::main(argc, argv);
 }

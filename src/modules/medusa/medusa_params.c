@@ -35,8 +35,8 @@
  * @file medusa_params.c
  * Parameters for medusa drone.
  *
- * @author Julien Di Tria 
- * @author Andre Farinha 
+ * @author Julien Di Tria
+ * @author Andre Farinha
  */
 
 /**
@@ -55,7 +55,7 @@ PARAM_DEFINE_FLOAT(MDSA_DEPTH_TRGT, 0.0f);
 /**
  * Medusa sample status
  *
- * Status of the water sample : 0 - not sampling, 1 sampling on filter 1 , 2 sampling on filter 2. Changed back to 0 by underwater pod. 
+ * Status of the water sample : 0 - not sampling, 1 sampling on filter 1 , 2 sampling on filter 2. Changed back to 0 by underwater pod.
  *
  * @min 0
  * @max 2
@@ -63,7 +63,7 @@ PARAM_DEFINE_FLOAT(MDSA_DEPTH_TRGT, 0.0f);
  * @increment 1
  * @group Medusa
  */
-PARAM_DEFINE_FLOAT(MDSA_SMPL_STATUS, 0);
+PARAM_DEFINE_INT32(MDSA_SMPL_STATUS, 0);
 
 /**
  * Medusa sample depth

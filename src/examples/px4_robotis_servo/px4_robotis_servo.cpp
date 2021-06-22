@@ -38,6 +38,7 @@
 #include <px4_platform_common/px4_config.h>
 #include <px4_platform_common/posix.h>
 #include <px4_platform_common/log.h>
+#include <px4_platform_common/module.h>
 #include <px4_platform_common/defines.h>
 
 #ifndef MIN
@@ -136,7 +137,7 @@ const AP_Param::GroupInfo px4_robotis_servo::var_info[] = {
 /* thread state */
 static volatile bool thread_should_exit = false;
 static volatile bool thread_running = false;
-static int robotis_servo_task;
+static int robotis_task;
 
 // Export main function so that we can call on it in PX4
 extern "C" __EXPORT int px4_robotis_servo_main(int argc, char *argv[]);

@@ -35,15 +35,16 @@
 
 #include <px4_platform_common/module.h>
 #include <px4_platform_common/module_params.h>
+
 #include <uORB/Subscription.hpp>
+#include <uORB/SubscriptionInterval.hpp>
 #include <uORB/topics/battery_status.h>
 #include <uORB/topics/parameter_update.h>
 #include <uORB/topics/rc_channels.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_land_detected.h>
 
-extern "C" __EXPORT int template_module_main(int argc, char *argv[]);
-
+using namespace time_literals;
 
 class Medusa : public ModuleBase<Medusa>, public ModuleParams
 {
@@ -81,16 +82,16 @@ private:
 
 	// define new param for medusa
 	DEFINE_PARAMETERS(
-		(ParamInt<px4::params::MDSA_DEPTH_TRGT>) _param_medusa_depth_trgt,   /**< depth target of the submarine */
-		(ParamInt<px4::params::MDSA_SMPL_STATUS>) _param_medusa_sample_status  /**< sample status */
-		(ParamInt<px4::params::MDSA_SMPL_DEPTH>) _param_medusa_sample_depth  /**< sample depth */
-		(ParamInt<px4::params::MDSA_SMPL_VOL>) _param_medusa_sample_volume  /**< sample volume */
-		(ParamInt<px4::params::MDSA_SMPL_DP>) _param_medusa_sample_dp  /**< sample differential pressure */
-	)
+		(ParamFloat<px4::params::MDSA_DEPTH_TRGT>) _param_medusa_depth_trgt,   /**< depth target of the submarine */
+		(ParamInt<px4::params::MDSA_SMPL_STATUS>) _param_medusa_sample_status, /**< sample status */
+		(ParamFloat<px4::params::MDSA_SMPL_DEPTH>) _param_medusa_sample_depth,  /**< sample depth */
+		(ParamFloat<px4::params::MDSA_SMPL_VOL>) _param_medusa_sample_volume,  /**< sample volume */
+		(ParamFloat<px4::params::MDSA_SMPL_DP>) _param_medusa_sample_dp  /**< sample differential pressure */
+	);
 
 	// Subscriptions
 	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
-	
+
 	struct vehicle_status_s _vehicle_status {};
 	struct vehicle_land_detected_s _vehicle_land_detected {};
 	struct rc_channels_s _rc_channels {};
