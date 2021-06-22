@@ -104,6 +104,7 @@
 #define   STATUS_RETURN_ALL  2
 
 #define REG_GOAL_POSITION 116
+#define REG_PRESENT_POSITION 132
 
 // how many times to send servo configure msgs
 #define CONFIGURE_SERVO_COUNT 4
