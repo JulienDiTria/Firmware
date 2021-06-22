@@ -237,9 +237,10 @@ void px4_robotis_servo::init(void)
 	set_uart_single_wire(uart, true);
 
 	if (uart) {
-		baudrate = B57600;
+		baudrate = 57600;
 		us_per_byte = 10 * 1e6 / baudrate;
 		us_gap = 4 * 1e6 / baudrate;
+        PX4_INFO("baudrate %u, us_per_byte %u, us_gap %u" , baudrate, us_per_byte, us_gap);
 	}
     PX4_INFO("px4_robotis_servo::init done");
 }
@@ -353,6 +354,7 @@ void px4_robotis_servo::send_packet(uint8_t *txpacket)
 
     // check max packet length
     uint16_t total_packet_length = DXL_MAKEWORD(txpacket[PKT_LENGTH_L], txpacket[PKT_LENGTH_H]) + 7;
+    PX4_INFO("total_packet_length = %u", total_packet_length);
 
     // make packet header
     txpacket[PKT_HEADER0]   = 0xFF;
@@ -525,8 +527,8 @@ void px4_robotis_servo::update()
     read_bytes();
 
     const hrt_abstime now = hrt_absolute_time();
+    //PX4_INFO("last_send_us %llu, now %llu, now - last_send_us %llu, delay_time_us %llu", last_send_us, now, now - last_send_us, delay_time_us);
     if (last_send_us != 0 && now - last_send_us < delay_time_us) {
-        PX4_INFO("last_send_us != 0 && now - last_send_us < delay_time_us");
         return;
     }
 
@@ -583,5 +585,6 @@ int px4_robotis_servo_main(int argc, char *argv[]){
 
 	while(true){
 		servo.update();
+        px4_usleep(10000);
 	}
 }
