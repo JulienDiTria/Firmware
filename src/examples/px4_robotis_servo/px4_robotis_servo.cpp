@@ -505,7 +505,7 @@ void px4_robotis_servo::process_packet(const uint8_t *pkt, uint8_t length)
 void px4_robotis_servo::update()
 {
 	PX4_INFO("px4_robotis_servo::update");
-	
+
     if (!initialised) {
         initialised = true;
         init();
@@ -545,6 +545,8 @@ void px4_robotis_servo::update()
     delay_time_us = 0;
 
     pos += d_pos;
+
+    PX4_INFO("position is %d", pos);
 
     if(pos>pos_max){
 	    d_pos = -10;
