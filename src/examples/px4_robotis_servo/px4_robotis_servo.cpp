@@ -234,7 +234,6 @@ void px4_robotis_servo::init(void)
     memset(pktbuf, 0, sizeof(pktbuf));
     memset(device_name, '\0', sizeof(device_name));
 
-
     PX4_INFO("px4_robotis_servo::init on ttyS2");
 	strncpy(device_name, "/dev/ttyS2", 15); /* default USART3	/dev/ttyS2	TELEM2 */
 

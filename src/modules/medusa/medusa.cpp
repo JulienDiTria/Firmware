@@ -138,6 +138,8 @@ void Medusa::run()
 		} else {
 			if (fds[0].revents & POLLIN) {
 				orb_copy(ORB_ID(vehicle_status), vehicle_status_sub, &_vehicle_status);
+				// _vehicle_status.
+				// arming_state
 				PX4_INFO("received _vehicle_status");
 			}
 			if (fds[1].revents & POLLIN) {
