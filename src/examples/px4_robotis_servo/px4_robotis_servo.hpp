@@ -50,24 +50,24 @@ private:
     void configure_servos(void);
 
     // auto-detected mask of available servos, from a broadcast ping
-    uint16_t servo_mask;
-    uint8_t detection_count;
-    uint8_t configured_servos;
-    bool initialised;
+    uint16_t servo_mask = 0;
+    uint8_t detection_count = 0;
+    uint8_t configured_servos = 0;
+    bool initialised = false;
 
     uint8_t pktbuf[64];
-    uint8_t pktbuf_ofs;
+    uint8_t pktbuf_ofs = 0;
 
     // servo position limits
-    int32_t pos_min;
-    int32_t pos_max;
+    int32_t pos_min = 0;
+    int32_t pos_max = 0;
 
     // current pos of all servo
     int32_t pos = 0;
     int32_t d_pos = 10;
 
-    hrt_abstime last_send_us;
-    hrt_abstime delay_time_us;
+    hrt_abstime last_send_us = 0;
+    hrt_abstime delay_time_us = 0;
 
     char device_name[16];
     struct termios uart_config_original;

@@ -218,10 +218,10 @@ static void set_uart_single_wire(int uart, bool single_wire)
 px4_robotis_servo::px4_robotis_servo(void)
 {
     // set defaults from the parameter table
-    // AP_Param::setup_object_defaults(this, var_info);
+    PX4_INFO("constructor (!initialised) == %d", (!initialised));
     if (!initialised) {
-        initialised = true;
         init();
+        initialised = true;
         last_send_us = hrt_absolute_time();
         return;
     }
@@ -229,6 +229,12 @@ px4_robotis_servo::px4_robotis_servo(void)
 
 void px4_robotis_servo::init(void)
 {
+    PX4_INFO("init");
+
+    memset(pktbuf, 0, sizeof(pktbuf));
+    memset(device_name, '\0', sizeof(device_name));
+
+
     PX4_INFO("px4_robotis_servo::init on ttyS2");
 	strncpy(device_name, "/dev/ttyS2", 15); /* default USART3	/dev/ttyS2	TELEM2 */
 
@@ -526,9 +532,9 @@ void px4_robotis_servo::process_packet(const uint8_t *pkt, uint8_t length)
 
 void px4_robotis_servo::update()
 {
-	//PX4_INFO("px4_robotis_servo::update");
+	PX4_INFO("px4_robotis_servo::update");
 
-    //PX4_INFO("if (!initialised) {");
+    PX4_INFO("(!initialised) == %d", (!initialised));
     if (!initialised) {
         initialised = true;
         init();
@@ -536,30 +542,33 @@ void px4_robotis_servo::update()
         return;
     }
 
-    //PX4_INFO("if (uart < 0)");
+    PX4_INFO("(uart < 0) == %d, uart = %d", (uart < 0), uart);
     if (uart < 0) {
         return;
     }
 
-    //PX4_INFO("read_bytes();");
+    PX4_INFO("read_bytes();");
     read_bytes();
 
     const hrt_abstime now = hrt_absolute_time();
-    //PX4_INFO("last_send_us %llu, now %llu, now - last_send_us %llu, delay_time_us %llu", last_send_us, now, now - last_send_us, delay_time_us);
+    PX4_INFO("last_send_us %llu, now %llu, now - last_send_us %llu, delay_time_us %llu", last_send_us, now, now - last_send_us, delay_time_us);
     if (last_send_us != 0 && now - last_send_us < delay_time_us) {
         return;
     }
 
+    PX4_INFO("detection_count < DETECT_SERVO_COUNT ?");
     if (detection_count < DETECT_SERVO_COUNT) {
         detection_count++;
         detect_servos();
     }
 
+    PX4_INFO("servo_mask == 0 ?");
     if (servo_mask == 0) {
         PX4_INFO("servo_mask == 0");
         return;
     }
 
+    PX4_INFO("configured_servos < CONFIGURE_SERVO_COUNT ?");
     if (configured_servos < CONFIGURE_SERVO_COUNT) {
         configured_servos++;
         last_send_us = now;
@@ -571,9 +580,8 @@ void px4_robotis_servo::update()
     last_send_us = now;
     delay_time_us = 0;
 
-    pos += d_pos;
-
     PX4_INFO("position is %d", pos);
+    pos += d_pos;
 
     if(pos>pos_max){
 	    d_pos = -10;
@@ -584,6 +592,7 @@ void px4_robotis_servo::update()
 	    pos = pos_min;
     }
 
+    PX4_INFO("send_command position");
     // loop for all 16 channels
     //for (uint8_t i=0; i<PWM_OUTPUT_MAX_CHANNELS; i++) {
     for (uint8_t i=0; i<16; i++) {
@@ -602,15 +611,20 @@ void px4_robotis_servo::update()
 static int robotis_servo_thread_main(int argc, char *argv[])
 {
     PX4_INFO("robotis_servo_thread_main starting");
-	px4_robotis_servo servo;
+    thread_running = true;
+
+    /*px4_robotis_servo servo;
 
 	while (!thread_should_exit){
+        PX4_INFO("update loop");
 		servo.update();
-        px4_usleep(10000);
+        usleep(200);
 	}
 
     servo.stop();
+    */
 
+    PX4_INFO("robotis_servo_thread_main stopping");
 	thread_running = false;
     return 0;
 }
@@ -629,6 +643,14 @@ int px4_robotis_servo_main(int argc, char *argv[]){
 			PX4_INFO("px4_robotis_servo already running");
 			return 0;
 		}
+
+        px4_robotis_servo servo;
+        int i=0;
+        while(i++<20){
+            servo.update();
+            usleep(100000);
+        }
+        servo.stop();
 
 		thread_should_exit = false;
 		robotis_task = px4_task_spawn_cmd("px4_robotis_servo",
