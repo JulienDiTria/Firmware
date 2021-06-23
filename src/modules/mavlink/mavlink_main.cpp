@@ -1703,7 +1703,8 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 
 	/* fallthrough */
 	case MAVLINK_MODE_CUSTOM:
-		//stream nothing
+		configure_stream_local("RC_CHANNELS", 20.0f);
+		configure_stream_local("DEBUG_VECT", 1.0f);
 		break;
 
 	case MAVLINK_MODE_CONFIG: // USB
@@ -1767,6 +1768,7 @@ Mavlink::configure_streams_to_default(const char *configure_single_stream)
 
 	case MAVLINK_MODE_IRIDIUM:
 		configure_stream_local("HIGH_LATENCY2", 0.015f);
+
 		break;
 
 	case MAVLINK_MODE_MINIMAL:
