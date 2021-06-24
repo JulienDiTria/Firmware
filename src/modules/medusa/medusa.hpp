@@ -40,6 +40,7 @@
 #include <uORB/SubscriptionInterval.hpp>
 #include <uORB/topics/battery_status.h>
 #include <uORB/topics/parameter_update.h>
+#include <uORB/topics/debug_key_value.h>
 #include <uORB/topics/rc_channels.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_land_detected.h>
@@ -71,6 +72,9 @@ public:
 	/** @see ModuleBase::print_status() */
 	int print_status() override;
 
+	// update internal state, data and param of module
+	void update();
+
 private:
 
 	/**
@@ -95,6 +99,30 @@ private:
 	struct vehicle_status_s _vehicle_status {};
 	struct vehicle_land_detected_s _vehicle_land_detected {};
 	struct rc_channels_s _rc_channels {};
+	struct debug_vect_s _debug_vect {};
+
+	/// mavlink msg
+
+	void parse_mavlink_debug();
+
+	bool _log_sd = false;
+	long _timestamp = 0 ;
+	int _curr_smpl_nb = 0;
+
+	float _depth_m = 0.;
+	float _pitch_deg = 0.;
+	float _delta_p_mbar = 0.;
+	float _volume = 0.;
+
+	uint8_t sample_flags = 0;
+	int _nb = 0;
+	float _volume_ml = 0.;
+	float _depth = 0.;
+	long _time_start = 0;
+	long _time_end = 0;
+	long _time_needed = 0;
+	float _pressure_dp_start = 0.;
+	float _pressure_dp_end = 0.;
 
 };
 

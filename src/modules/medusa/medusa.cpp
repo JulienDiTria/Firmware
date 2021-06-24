@@ -37,8 +37,13 @@
 #include <px4_platform_common/log.h>
 #include <px4_platform_common/posix.h>
 
+#include <uORB/uORB.h>
+#include <uORB/topics/debug_vect.h>
 #include <uORB/topics/parameter_update.h>
-#include <uORB/topics/sensor_combined.h>
+#include <uORB/topics/rc_channels.h>
+#include <uORB/topics/vehicle_status.h>
+#include <uORB/topics/vehicle_land_detected.h>
+
 
 extern "C" __EXPORT int medusa_main(int argc, char *argv[]);
 
@@ -52,22 +57,8 @@ int Medusa::print_status()
 
 int Medusa::custom_command(int argc, char *argv[])
 {
-	/*
-	if (!is_running()) {
-		print_usage("not running");
-		return 1;
-	}
-
-	// additional custom commands can be handled like this:
-	if (!strcmp(argv[0], "do-something")) {
-		get_instance()->do_something();
-		return 0;
-	}
-	 */
-
 	return print_usage("unknown command");
 }
-
 
 int Medusa::task_spawn(int argc, char *argv[])
 {
@@ -107,15 +98,18 @@ void Medusa::run()
 	int vehicle_status_sub = orb_subscribe(ORB_ID(vehicle_status));
 	int vehicle_land_detected_sub = orb_subscribe(ORB_ID(vehicle_land_detected));
 	int rc_channels_sub = orb_subscribe(ORB_ID(rc_channels));
+	int debug_sub = orb_subscribe(ORB_ID(debug_vect));
 
 	orb_set_interval(vehicle_status_sub, 200);
 	orb_set_interval(vehicle_land_detected_sub, 200);
 	orb_set_interval(rc_channels_sub, 200);
+	orb_set_interval(debug_sub, 200);
 
 	px4_pollfd_struct_t fds[] = {
 		{ .fd = vehicle_status_sub,   .events = POLLIN },
 		{ .fd = vehicle_land_detected_sub,   .events = POLLIN },
 		{ .fd = rc_channels_sub,   .events = POLLIN },
+		{ .fd = debug_sub,   .events = POLLIN },
 	};
 
 	// initialize parameters
@@ -138,8 +132,6 @@ void Medusa::run()
 		} else {
 			if (fds[0].revents & POLLIN) {
 				orb_copy(ORB_ID(vehicle_status), vehicle_status_sub, &_vehicle_status);
-				// _vehicle_status.
-				// arming_state
 				PX4_INFO("received _vehicle_status");
 			}
 			if (fds[1].revents & POLLIN) {
@@ -150,8 +142,11 @@ void Medusa::run()
 				orb_copy(ORB_ID(rc_channels), rc_channels_sub, &_rc_channels);
 				PX4_INFO("received _rc_channels");
 			}
-
-			//sm_update();
+			if (fds[3].revents & POLLIN) {
+				orb_copy(ORB_ID(debug_vect), debug_sub, &_debug_vect);
+				PX4_INFO("received _debug_vect");
+			}
+			update();
 		}
 		parameters_update();
 	}
@@ -159,6 +154,37 @@ void Medusa::run()
 	orb_unsubscribe(vehicle_status_sub);
 	orb_unsubscribe(vehicle_land_detected_sub);
     	orb_unsubscribe(rc_channels_sub);
+    	orb_unsubscribe(debug_sub);
+}
+
+void Medusa::update(){
+	// _vehicle_status.
+	// arming_state
+
+	parse_mavlink_debug();
+
+}
+
+void Medusa::parse_mavlink_debug(){
+	if(MEDUSA_DEBUG_INDEX != _debug_vect.x){
+		return;
+	}
+
+	float index = _debug_vect.y;
+	float data = _debug_vect.z
+	switch(index){
+		case MEDUSA_DEBUG_LOG: {
+			_log_sd = (data == 0.);
+		} break;
+
+		case MEDUSA_DEBUG_TIMESTAMP:{
+			_timestamp = (long)data;
+		} break;
+
+		case MEDUSA_DEBUG_TIMESTAMP:{
+			_timestamp = (long)data;
+		} break;
+	}
 }
 
 void Medusa::parameters_update(bool force)
