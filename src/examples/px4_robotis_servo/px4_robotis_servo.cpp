@@ -144,6 +144,7 @@ extern "C" __EXPORT int px4_robotis_servo_main(int argc, char *argv[]);
 
 static int robotis_open_uart(const char *uart_name, struct termios *uart_config, struct termios *uart_config_original);
 static void set_uart_single_wire(int uart, bool single_wire);
+static void set_uart_invert(int uart, bool invert);
 static void usage(void);
 
 /*
@@ -203,15 +204,29 @@ static int robotis_open_uart(const char *uart_name, struct termios *uart_config,
 		return -1;
 	}
 
+    set_uart_single_wire(uart, true); // ioctl(uart, TIOCSSINGLEWIRE, single_wire ? (SER_SINGLEWIRE_ENABLED | SER_SINGLEWIRE_PUSHPULL | SER_SINGLEWIRE_PULLDOWN) : 0)
+    set_uart_invert(uart, true); // ioctl(uart, TIOCSINVERT, invert ? (SER_INVERT_ENABLED_RX | SER_INVERT_ENABLED_TX) : 0)
+
 	return uart;
 }
 
 static void set_uart_single_wire(int uart, bool single_wire)
 {
+    PX4_INFO("set_uart_single_wire");
 	if (ioctl(uart, TIOCSSINGLEWIRE, single_wire ? (SER_SINGLEWIRE_ENABLED | SER_SINGLEWIRE_PUSHPULL |
 			SER_SINGLEWIRE_PULLDOWN) : 0) < 0) {
 		PX4_WARN("setting TIOCSSINGLEWIRE failed");
 	}
+}
+
+static void set_uart_invert(int uart, bool invert)
+{
+    PX4_INFO("set_uart_invert");
+	// Not all architectures support this. That's ok as it will just re-test the non-inverted case
+	if (ioctl(uart, TIOCSINVERT, invert ? (SER_INVERT_ENABLED_RX | SER_INVERT_ENABLED_TX) : 0)<0){
+        PX4_WARN("setting TIOCSINVERT failed");
+        PX4_INFO("set_uart_invert failed");
+    }
 }
 
 // constructor
@@ -246,7 +261,7 @@ void px4_robotis_servo::init(void)
 		return;
 	}
 
-	set_uart_single_wire(uart, true);
+    sleep(5);
 
 	if (uart>0) {
 		baudrate = 57600;
