@@ -40,7 +40,7 @@
 #include <uORB/SubscriptionInterval.hpp>
 #include <uORB/topics/battery_status.h>
 #include <uORB/topics/parameter_update.h>
-#include <uORB/topics/debug_key_value.h>
+#include <uORB/topics/debug_vect.h>
 #include <uORB/topics/rc_channels.h>
 #include <uORB/topics/vehicle_status.h>
 #include <uORB/topics/vehicle_land_detected.h>

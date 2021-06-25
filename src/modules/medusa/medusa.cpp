@@ -33,6 +33,9 @@
 
 #include "medusa.hpp"
 
+#include "medusa_mavlink_debug.h"
+
+
 #include <px4_platform_common/getopt.h>
 #include <px4_platform_common/log.h>
 #include <px4_platform_common/posix.h>
@@ -166,24 +169,24 @@ void Medusa::update(){
 }
 
 void Medusa::parse_mavlink_debug(){
-	if(MEDUSA_DEBUG_INDEX != _debug_vect.x){
+	if(MEDUSA_DEBUG_INDEX != (int) _debug_vect.x){
 		return;
 	}
 
-	float index = _debug_vect.y;
-	float data = _debug_vect.z
+	int index = (int) _debug_vect.y;
+	float data = _debug_vect.z;
 	switch(index){
 		case MEDUSA_DEBUG_LOG: {
-			_log_sd = (data == 0.);
+			_log_sd = (data > 0);
 		} break;
 
 		case MEDUSA_DEBUG_TIMESTAMP:{
 			_timestamp = (long)data;
 		} break;
 
-		case MEDUSA_DEBUG_TIMESTAMP:{
-			_timestamp = (long)data;
-		} break;
+		//case MEDUSA_DEBUG_TIMESTAMP:{
+		//	_timestamp = (long)data;
+		//} break;
 	}
 }
 
