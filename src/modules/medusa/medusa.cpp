@@ -148,6 +148,7 @@ void Medusa::run()
 			if (fds[3].revents & POLLIN) {
 				orb_copy(ORB_ID(debug_vect), debug_sub, &_debug_vect);
 				PX4_INFO("received _debug_vect");
+				parse_mavlink_debug();
 			}
 			update();
 		}
@@ -163,30 +164,33 @@ void Medusa::run()
 void Medusa::update(){
 	// _vehicle_status.
 	// arming_state
-
-	parse_mavlink_debug();
-
 }
 
 void Medusa::parse_mavlink_debug(){
-	if(MEDUSA_DEBUG_INDEX != (int) _debug_vect.x){
-		return;
+	if(!strncmp(_debug_vect.name, MD_STATUS, 10)){
+		_log_sd = (_debug_vect.x > 0 );
+		_curr_smpl_nb = (int) _debug_vect.y;
+		_sampling_status = (int) _debug_vect.z;
 	}
-
-	int index = (int) _debug_vect.y;
-	float data = _debug_vect.z;
-	switch(index){
-		case MEDUSA_DEBUG_LOG: {
-			_log_sd = (data > 0);
-		} break;
-
-		case MEDUSA_DEBUG_TIMESTAMP:{
-			_timestamp = (long)data;
-		} break;
-
-		//case MEDUSA_DEBUG_TIMESTAMP:{
-		//	_timestamp = (long)data;
-		//} break;
+	else if(!strncmp(_debug_vect.name, MD_STREAM, 10)){
+		_depth_cm = _debug_vect.x;
+		_delta_p_mbar = _debug_vect.y;
+		_volume = _debug_vect.z;
+	}
+	else if(!strncmp(_debug_vect.name, MD_SAM_1, 10)){
+		_nb = (int) _debug_vect.x;
+		_volume_ml = _debug_vect.y;
+		_depth = _debug_vect.z;
+	}
+	else if(!strncmp(_debug_vect.name, MD_SAM_2, 10)){
+		_time_start = (long) _debug_vect.x;
+		_time_end = (long) _debug_vect.y;
+		_time_needed = (long)  _debug_vect.z;
+	}
+	else if(!strncmp(_debug_vect.name, MD_SAM_3, 10)){
+		_pressure_dp_start = _debug_vect.x;
+		_pressure_dp_end = _debug_vect.y;
+		// unused _debug_vect.z;
 	}
 }
 

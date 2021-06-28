@@ -105,24 +105,27 @@ private:
 
 	void parse_mavlink_debug();
 
-	bool _log_sd = false;
 	long _timestamp = 0 ;
-	int _curr_smpl_nb = 0;
 
-	float _depth_m = 0.;
-	float _pitch_deg = 0.;
+	// md_status
+	bool _log_sd = false;
+	int _curr_smpl_nb = 0;
+	int _sampling_status = 0;
+
+	// md_stream
+	float _depth_cm = 0.;
 	float _delta_p_mbar = 0.;
 	float _volume = 0.;
 
-	uint8_t sample_flags = 0;
-	int _nb = 0;
-	float _volume_ml = 0.;
-	float _depth = 0.;
-	long _time_start = 0;
-	long _time_end = 0;
-	long _time_needed = 0;
-	float _pressure_dp_start = 0.;
-	float _pressure_dp_end = 0.;
+	// md_sam_1 2 and 3
+	int _nb = 0; // x
+	float _volume_ml = 0.; // y
+	float _depth = 0.; // z
+	long _time_start = 0; // x
+	long _time_end = 0; // y
+	long _time_needed = 0; // z
+	float _pressure_dp_start = 0.; // x
+	float _pressure_dp_end = 0.; // y
 
 };
 
