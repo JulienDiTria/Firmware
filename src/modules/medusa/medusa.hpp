@@ -101,6 +101,15 @@ private:
 	struct rc_channels_s _rc_channels {};
 	struct debug_vect_s _debug_vect {};
 
+
+	// sd card logging file name
+	const char* _sd_filename_fmt = "/fs/microsd/log_%d.txt";
+	char _sd_filename[64] = "";
+	int _sd_fd = 0;
+	void open_sd_file(uint64_t timestamp);
+	void close_sd_file();
+	void write_to_sd(const char* msg, int sizeof_msg);
+
 	/// mavlink msg
 
 	void parse_mavlink_debug();
