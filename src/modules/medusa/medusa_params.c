@@ -53,9 +53,22 @@
 PARAM_DEFINE_FLOAT(MDSA_DEPTH_TRGT, 0.0f);
 
 /**
+ * Medusa current depth
+ *
+ * Current depth of the underwater pod [m]
+ *
+ * @min 0
+ * @max 10
+ * @decimal 3
+ * @increment 0.01
+ * @group Medusa
+ */
+PARAM_DEFINE_FLOAT(MDSA_DEPTH_CUR, 0.0f);
+
+/**
  * Medusa sample status
  *
- * Status of the water sample : 0 - not sampling, 1 sampling on filter 1 , 2 sampling on filter 2. Changed back to 0 by underwater pod.
+ * Set by UW pod. Status of the water sample : 0 - not sampling, 1 sampling on filter 1 , 2 sampling on filter 2. Changed back to 0 by underwater pod.
  *
  * @min 0
  * @max 2
@@ -66,22 +79,9 @@ PARAM_DEFINE_FLOAT(MDSA_DEPTH_TRGT, 0.0f);
 PARAM_DEFINE_INT32(MDSA_SMPL_STATUS, 0);
 
 /**
- * Medusa sample depth
- *
- * Depth at which the sample is being done in [m]
- *
- * @min 0
- * @max 10
- * @decimal 3
- * @increment 0.01
- * @group Medusa
- */
-PARAM_DEFINE_FLOAT(MDSA_SMPL_DEPTH, 0.0f);
-
-/**
  * Medusa sample volume
  *
- * Volumne of water currently sampled in [ml]
+ * Set by UW pod. Volume of water currently sampled in [ml]
  *
  * @min 0
  * @max 1000
@@ -92,9 +92,22 @@ PARAM_DEFINE_FLOAT(MDSA_SMPL_DEPTH, 0.0f);
 PARAM_DEFINE_FLOAT(MDSA_SMPL_VOL, 0.0f);
 
 /**
+ * Medusa sample target volume
+ *
+ * Set by GCS to pod. Volume of water to sample in [ml]
+ *
+ * @min 0
+ * @max 1000
+ * @decimal 3
+ * @increment 0.01
+ * @group Medusa
+ */
+PARAM_DEFINE_FLOAT(MDSA_SMPL_TG_VOL, 0.0f);
+
+/**
  * Medusa sample differential pressure
  *
- * Differential pressure between the starting of the sample and now, in [mbar]
+ * Set by UW pod. Differential pressure between the starting of the sample and now, in [mbar]
  *
  * @min 0
  * @max 1000
@@ -104,3 +117,41 @@ PARAM_DEFINE_FLOAT(MDSA_SMPL_VOL, 0.0f);
  */
 PARAM_DEFINE_FLOAT(MDSA_SMPL_DP, 0.0f);
 
+/**
+ * Medusa sample nb
+ *
+ * Set by UW pod. Current sample number of the sample or last sample done. -1 means not sampled yet. should be 0 or 1.
+ *
+ * @min -1
+ * @max 1
+ * @decimal 0
+ * @increment 1
+ * @group Medusa
+ */
+PARAM_DEFINE_INT32(MDSA_SMPL_NB, -1);
+
+/**
+ * Medusa pitch target
+ *
+ * Pitch target to control the pod pitch in [deg]
+ *
+ * @min 0.0
+ * @max 10.0
+ * @decimal 3
+ * @increment 0.01
+ * @group Medusa
+ */
+PARAM_DEFINE_FLOAT(MDSA_PITCH_TRGT, 0.0f);
+
+/**
+ * Medusa current pitch
+ *
+ * Current pitch of the underwater pod [deg]
+ *
+ * @min 0
+ * @max 10
+ * @decimal 3
+ * @increment 0.01
+ * @group Medusa
+ */
+PARAM_DEFINE_FLOAT(MDSA_PITCH_CUR, 0.0f);

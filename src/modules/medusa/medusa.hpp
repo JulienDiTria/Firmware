@@ -86,11 +86,15 @@ private:
 
 	// define new param for medusa
 	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::MDSA_DEPTH_TRGT>) _param_medusa_depth_trgt,   /**< depth target of the submarine */
+		(ParamFloat<px4::params::MDSA_DEPTH_TRGT>) _param_medusa_depth_target,   /**< depth target of the submarine */
+		(ParamFloat<px4::params::MDSA_DEPTH_CUR>) _param_medusa_depth_current,   /**< current depth of the submarine */
 		(ParamInt<px4::params::MDSA_SMPL_STATUS>) _param_medusa_sample_status, /**< sample status */
-		(ParamFloat<px4::params::MDSA_SMPL_DEPTH>) _param_medusa_sample_depth,  /**< sample depth */
 		(ParamFloat<px4::params::MDSA_SMPL_VOL>) _param_medusa_sample_volume,  /**< sample volume */
-		(ParamFloat<px4::params::MDSA_SMPL_DP>) _param_medusa_sample_dp  /**< sample differential pressure */
+		(ParamFloat<px4::params::MDSA_SMPL_TG_VOL>) _param_medusa_sample_volume_target,  /**< sample target volume */
+		(ParamFloat<px4::params::MDSA_SMPL_DP>) _param_medusa_sample_dp,  /**< sample differential pressure */
+		(ParamInt<px4::params::MDSA_SMPL_NB>) _param_medusa_sample_nb, /**< current sample nb */
+		(ParamFloat<px4::params::MDSA_PITCH_TRGT>) _param_medusa_pitch_target,   /**< pitch target of the submarine */
+		(ParamFloat<px4::params::MDSA_PITCH_CUR>) _param_medusa_pitch_current   /**< current pitch of the submarine */
 	);
 
 	// Subscriptions
@@ -105,10 +109,10 @@ private:
 	// sd card logging file name
 	const char* _sd_filename_fmt = "/fs/microsd/log_%d.txt";
 	char _sd_filename[64] = "";
-	int _sd_fd = 0;
-	void open_sd_file(uint64_t timestamp);
-	void close_sd_file();
-	void write_to_sd(const char* msg, int sizeof_msg);
+	int _sd_log_fd = 0;
+	int open_sd_file(uint64_t timestamp);
+	void close_sd_file(int fd);
+	void write_to_sd(int fd, const char* msg, int sizeof_msg);
 
 	/// mavlink msg
 

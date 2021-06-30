@@ -166,54 +166,73 @@ void Medusa::update(){
 
 }
 
-void Medusa::open_sd_file(uint64_t timestamp){
+int Medusa::open_sd_file(uint64_t timestamp){
 	snprintf(_sd_filename, 64, _sd_filename_fmt, _debug_vect.timestamp);
-	_sd_fd = open(_sd_filename, O_TRUNC | O_WRONLY | O_CREAT, PX4_O_MODE_666);
-	if(_sd_fd<0){
+	int sd_fd = open(_sd_filename, O_TRUNC | O_WRONLY | O_CREAT, PX4_O_MODE_666);
+	if(sd_fd<0){
 		PX4_WARN("can't open sd file '%s'", _sd_filename);
 	}
-	return ;
+	return sd_fd;
 }
 
-void Medusa::close_sd_file(){
-	if(_sd_fd<0) return;
-	close(_sd_fd);
+void Medusa::close_sd_file(int sd_file_fd){
+	if(sd_file_fd<0) return;
+	close(sd_file_fd);
 	return;
 }
 
-void Medusa::write_to_sd(const char* msg, int sizeof_msg){
-	if(_sd_fd<0) {
-		PX4_INFO("Sd card file with fd %d, filename '%s' not open", _sd_fd, _sd_filename);
+void Medusa::write_to_sd(int sd_file_fd, const char* msg, int sizeof_msg){
+	if(sd_file_fd<0) {
+		PX4_INFO("Sd card file with fd %d, filename '%s' not open", sd_file_fd, _sd_filename);
 		return;
 	}
-	int wret = write(_sd_fd, msg, sizeof_msg);
+	int wret = write(sd_file_fd, msg, sizeof_msg);
 	if (wret != sizeof_msg) {
-		PX4_INFO("WRITE ERROR! on sd card with fd %d, filename %s", _sd_fd, _sd_filename);
+		PX4_INFO("WRITE ERROR! on sd card with fd %d, filename %s", sd_file_fd, _sd_filename);
 	}
 }
 
 void Medusa::parse_mavlink_debug(){
 	if(!strncmp(_debug_vect.name, MD_STATUS, 10)){
 		if(!_log_sd && (_debug_vect.x > 0.5f )){
-			open_sd_file(_debug_vect.timestamp);
-			const char msg[] = "start sd card writting\n";
-			write_to_sd(msg, sizeof(msg));
+			int sd_fd = open_sd_file(_debug_vect.timestamp);
+			if(sd_fd>=0){
+				_sd_log_fd = sd_fd;
+				const char msg[] = "start sd card logging\n";
+				write_to_sd(_sd_log_fd, msg, sizeof(msg));
+			}
+
 		}
 		if(_log_sd && (_debug_vect.x < 0.5f )){
-			close_sd_file();
+			close_sd_file(_sd_log_fd);
 		}
+		// get values
 		_log_sd = (_debug_vect.x > 0.5f );
 		_curr_smpl_nb = (int) _debug_vect.y;
 		_sampling_status = (int) _debug_vect.z;
-		const char msg_2_fmt[] = "curr_smpl_nb %d\nsampling_status %d\n";
-		char msg_2[64] = "";
-		snprintf(msg_2, 64-1, msg_2_fmt, _curr_smpl_nb, _sampling_status);
-		write_to_sd(msg_2, sizeof(msg_2));
+
+		// update params
+		_param_medusa_sample_status = _sampling_status;
+		_param_medusa_sample_nb = _curr_smpl_nb;
+
+		// write to log if needed
+		if(_log_sd){
+			const char msg_2_fmt[] = "curr_smpl_nb %d\nsampling_status %d\n";
+			char msg_2[64] = "";
+			snprintf(msg_2, 64-1, msg_2_fmt, _curr_smpl_nb, _sampling_status);
+			write_to_sd(_sd_log_fd, msg_2, sizeof(msg_2));
+		}
 	}
 	else if(!strncmp(_debug_vect.name, MD_STREAM, 10)){
+		// update internal values
 		_depth_cm = _debug_vect.x;
 		_delta_p_mbar = _debug_vect.y;
 		_volume = _debug_vect.z;
+
+		// update params
+		_param_medusa_depth_current = _depth_cm/100;
+		_param_medusa_sample_volume = _volume;
+		_param_medusa_sample_dp = _delta_p_mbar;
 	}
 	else if(!strncmp(_debug_vect.name, MD_SAM_1, 10)){
 		_nb = (int) _debug_vect.x;
@@ -229,6 +248,21 @@ void Medusa::parse_mavlink_debug(){
 		_pressure_dp_start = _debug_vect.x;
 		_pressure_dp_end = _debug_vect.y;
 		// unused _debug_vect.z;
+
+		const hrt_abstime now = hrt_absolute_time();
+		int sd_fd = open_sd_file((long) now);
+		const char msg_fmt1[] = " curr_smpl_nb %d\n volume %f ml\n depth %f cm\n";
+		const char msg_fmt2[] = " time_start %l ms\n time_end %l ms\n time_needed %l ms\n";
+		const char msg_fmt3[] = " pressure_dp_start %f mbar\n pressure_dp_end %f mb\nend \n";
+		int msg_len = 128;
+		char msg[msg_len] = "";
+		snprintf(msg, msg_len-1, msg_fmt1, _curr_smpl_nb, _volume_ml, _depth);
+		write_to_sd(sd_fd, msg, sizeof(msg));
+		snprintf(msg, msg_len-1, msg_fmt2, _time_start, _time_end, _time_needed);
+		write_to_sd(sd_fd, msg, sizeof(msg));
+		snprintf(msg, msg_len-1, msg_fmt3, _pressure_dp_start, _pressure_dp_end);
+		write_to_sd(sd_fd, msg, sizeof(msg));
+		close_sd_file(sd_fd);
 	}
 }
 
