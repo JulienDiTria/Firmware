@@ -1,0 +1,3 @@
+set +e
+medusa start      # start medusa without failure
+set -e
