@@ -86,14 +86,14 @@ private:
 
 	// define new param for medusa
 	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::MDSA_DEPTH_TRGT>) _param_medusa_depth_target,   /**< depth target of the submarine */
+		(ParamFloat<px4::params::MDSA_DEPTH_TGT>) _param_medusa_depth_target,   /**< depth target of the submarine */
 		(ParamFloat<px4::params::MDSA_DEPTH_CUR>) _param_medusa_depth_current,   /**< current depth of the submarine */
-		(ParamInt<px4::params::MDSA_SMPL_STATUS>) _param_medusa_sample_status, /**< sample status */
+		(ParamInt<px4::params::MDSA_SMPL_STTUS>) _param_medusa_sample_status, /**< sample status */
 		(ParamFloat<px4::params::MDSA_SMPL_VOL>) _param_medusa_sample_volume,  /**< sample volume */
-		(ParamFloat<px4::params::MDSA_SMPL_TG_VOL>) _param_medusa_sample_volume_target,  /**< sample target volume */
+		(ParamFloat<px4::params::MDSA_SMPL_TGVL>) _param_medusa_sample_volume_target,  /**< sample target volume */
 		(ParamFloat<px4::params::MDSA_SMPL_DP>) _param_medusa_sample_dp,  /**< sample differential pressure */
 		(ParamInt<px4::params::MDSA_SMPL_NB>) _param_medusa_sample_nb, /**< current sample nb */
-		(ParamFloat<px4::params::MDSA_PITCH_TRGT>) _param_medusa_pitch_target,   /**< pitch target of the submarine */
+		(ParamFloat<px4::params::MDSA_PITCH_TGT>) _param_medusa_pitch_target,   /**< pitch target of the submarine */
 		(ParamFloat<px4::params::MDSA_PITCH_CUR>) _param_medusa_pitch_current   /**< current pitch of the submarine */
 	);
 

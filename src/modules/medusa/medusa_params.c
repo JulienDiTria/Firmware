@@ -50,7 +50,7 @@
  * @increment 0.01
  * @group Medusa
  */
-PARAM_DEFINE_FLOAT(MDSA_DEPTH_TRGT, 0.5f);
+PARAM_DEFINE_FLOAT(MDSA_DEPTH_TGT, 0.5f);
 
 /**
  * Medusa current depth
@@ -76,7 +76,7 @@ PARAM_DEFINE_FLOAT(MDSA_DEPTH_CUR, 0.0f);
  * @increment 1
  * @group Medusa
  */
-PARAM_DEFINE_INT32(MDSA_SMPL_STATUS, 0);
+PARAM_DEFINE_INT32(MDSA_SMPL_STTUS, 0);
 
 /**
  * Medusa sample volume
@@ -102,7 +102,7 @@ PARAM_DEFINE_FLOAT(MDSA_SMPL_VOL, 0.0f);
  * @increment 0.01
  * @group Medusa
  */
-PARAM_DEFINE_FLOAT(MDSA_SMPL_TG_VOL, 0.0f);
+PARAM_DEFINE_FLOAT(MDSA_SMPL_TGVL, 0.0f);
 
 /**
  * Medusa sample differential pressure
@@ -141,7 +141,7 @@ PARAM_DEFINE_INT32(MDSA_SMPL_NB, -1);
  * @increment 0.01
  * @group Medusa
  */
-PARAM_DEFINE_FLOAT(MDSA_PITCH_TRGT, 0.0f);
+PARAM_DEFINE_FLOAT(MDSA_PITCH_TGT, 0.0f);
 
 /**
  * Medusa current pitch
