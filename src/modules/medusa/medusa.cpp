@@ -212,8 +212,8 @@ void Medusa::parse_mavlink_debug(){
 		_sampling_status = (int) _debug_vect.z;
 
 		// update params
-		_param_medusa_sample_status = _sampling_status;
-		_param_medusa_sample_nb = _curr_smpl_nb;
+		_param_medusa_sample_status.set(_sampling_status);
+		_param_medusa_sample_nb.set(_curr_smpl_nb);
 
 		// write to log if needed
 		if(_log_sd){
@@ -230,9 +230,9 @@ void Medusa::parse_mavlink_debug(){
 		_volume = _debug_vect.z;
 
 		// update params
-		_param_medusa_depth_current = _depth_cm/100;
-		_param_medusa_sample_volume = _volume;
-		_param_medusa_sample_dp = _delta_p_mbar;
+		_param_medusa_depth_current.set(_depth_cm/100);
+		_param_medusa_sample_volume.set(_volume);
+		_param_medusa_sample_dp.set(_delta_p_mbar);
 	}
 	else if(!strncmp(_debug_vect.name, MD_SAM_1, 10)){
 		_nb = (int) _debug_vect.x;
@@ -252,15 +252,15 @@ void Medusa::parse_mavlink_debug(){
 		const hrt_abstime now = hrt_absolute_time();
 		int sd_fd = open_sd_file((long) now);
 		const char msg_fmt1[] = " curr_smpl_nb %d\n volume %f ml\n depth %f cm\n";
-		const char msg_fmt2[] = " time_start %l ms\n time_end %l ms\n time_needed %l ms\n";
+		const char msg_fmt2[] = " time_start %ld ms\n time_end %ld ms\n time_needed %ld ms\n";
 		const char msg_fmt3[] = " pressure_dp_start %f mbar\n pressure_dp_end %f mb\nend \n";
 		int msg_len = 128;
 		char msg[msg_len] = "";
-		snprintf(msg, msg_len-1, msg_fmt1, _curr_smpl_nb, _volume_ml, _depth);
+		snprintf(msg, msg_len-1, msg_fmt1, _curr_smpl_nb, (double) _volume_ml, (double)_depth);
 		write_to_sd(sd_fd, msg, sizeof(msg));
 		snprintf(msg, msg_len-1, msg_fmt2, _time_start, _time_end, _time_needed);
 		write_to_sd(sd_fd, msg, sizeof(msg));
-		snprintf(msg, msg_len-1, msg_fmt3, _pressure_dp_start, _pressure_dp_end);
+		snprintf(msg, msg_len-1, msg_fmt3, (double)_pressure_dp_start, (double)_pressure_dp_end);
 		write_to_sd(sd_fd, msg, sizeof(msg));
 		close_sd_file(sd_fd);
 	}

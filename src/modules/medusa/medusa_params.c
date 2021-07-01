@@ -50,7 +50,7 @@
  * @increment 0.01
  * @group Medusa
  */
-PARAM_DEFINE_FLOAT(MDSA_DEPTH_TRGT, 0.0f);
+PARAM_DEFINE_FLOAT(MDSA_DEPTH_TRGT, 0.5f);
 
 /**
  * Medusa current depth
