@@ -134,20 +134,21 @@ void Medusa::run()
 
 		} else {
 			if (fds[0].revents & POLLIN) {
-				orb_copy(ORB_ID(vehicle_status), vehicle_status_sub, &_vehicle_status);
 				PX4_INFO("received _vehicle_status");
+				orb_copy(ORB_ID(vehicle_status), vehicle_status_sub, &_vehicle_status);
 			}
 			if (fds[1].revents & POLLIN) {
-				orb_copy(ORB_ID(vehicle_land_detected), vehicle_land_detected_sub, &_vehicle_land_detected);
 				PX4_INFO("received _vehicle_land_detected");
+				orb_copy(ORB_ID(vehicle_land_detected), vehicle_land_detected_sub, &_vehicle_land_detected);
 			}
 			if (fds[2].revents & POLLIN) {
-				orb_copy(ORB_ID(rc_channels), rc_channels_sub, &_rc_channels);
 				PX4_INFO("received _rc_channels");
+				orb_copy(ORB_ID(rc_channels), rc_channels_sub, &_rc_channels);
 			}
 			if (fds[3].revents & POLLIN) {
-				orb_copy(ORB_ID(debug_vect), debug_sub, &_debug_vect);
 				PX4_INFO("received _debug_vect");
+				orb_copy(ORB_ID(debug_vect), debug_sub, &_debug_vect);
+
 				parse_mavlink_debug();
 			}
 		}
@@ -158,12 +159,6 @@ void Medusa::run()
 	orb_unsubscribe(vehicle_land_detected_sub);
     	orb_unsubscribe(rc_channels_sub);
     	orb_unsubscribe(debug_sub);
-}
-
-void Medusa::update(){
-	// _vehicle_status.
-	// arming_state
-
 }
 
 int Medusa::open_sd_file(uint64_t timestamp){
@@ -193,7 +188,11 @@ void Medusa::write_to_sd(int sd_file_fd, const char* msg, int sizeof_msg){
 }
 
 void Medusa::parse_mavlink_debug(){
-	if(!strncmp(_debug_vect.name, MD_STATUS, 10)){
+	PX4_INFO("parse_mavlink_debug : _debug_vect.name -%s-", _debug_vect.name);
+
+	if(!strncmp(_debug_vect.name, MD_STATUS, strlen(MD_STATUS))){
+		PX4_INFO("parse_mavlink_debug : MD_STATUS found -%s-", _debug_vect.name);
+		/*
 		if(!_log_sd && (_debug_vect.x > 0.5f )){
 			int sd_fd = open_sd_file(_debug_vect.timestamp);
 			if(sd_fd>=0){
@@ -222,8 +221,10 @@ void Medusa::parse_mavlink_debug(){
 			snprintf(msg_2, 64-1, msg_2_fmt, _curr_smpl_nb, _sampling_status);
 			write_to_sd(_sd_log_fd, msg_2, sizeof(msg_2));
 		}
-	}
-	else if(!strncmp(_debug_vect.name, MD_STREAM, 10)){
+		*/
+	} else if(!strncmp(_debug_vect.name, MD_STREAM, strlen(MD_STREAM))){
+		PX4_INFO("parse_mavlink_debug : MD_STREAM found -%s-", _debug_vect.name);
+		/*
 		// update internal values
 		_depth_cm = _debug_vect.x;
 		_delta_p_mbar = _debug_vect.y;
@@ -233,22 +234,27 @@ void Medusa::parse_mavlink_debug(){
 		_param_medusa_depth_current.set(_depth_cm/100);
 		_param_medusa_sample_volume.set(_volume);
 		_param_medusa_sample_dp.set(_delta_p_mbar);
+		*/
 	}
-	else if(!strncmp(_debug_vect.name, MD_SAM_1, 10)){
+	else if(!strncmp(_debug_vect.name, MD_SAM_1, strlen(MD_SAM_1))){
+		PX4_INFO("parse_mavlink_debug : MD_SAM_1 found -%s-", _debug_vect.name);
 		_nb = (int) _debug_vect.x;
 		_volume_ml = _debug_vect.y;
 		_depth = _debug_vect.z;
 	}
-	else if(!strncmp(_debug_vect.name, MD_SAM_2, 10)){
+	else if(!strncmp(_debug_vect.name, MD_SAM_2, strlen(MD_SAM_2))){
+		PX4_INFO("parse_mavlink_debug : MD_SAM_2 found -%s-", _debug_vect.name);
 		_time_start = (long) _debug_vect.x;
 		_time_end = (long) _debug_vect.y;
 		_time_needed = (long)  _debug_vect.z;
 	}
-	else if(!strncmp(_debug_vect.name, MD_SAM_3, 10)){
+	else if(!strncmp(_debug_vect.name, MD_SAM_3, strlen(MD_SAM_3))){
+		PX4_INFO("parse_mavlink_debug : MD_SAM_3 found -%s-", _debug_vect.name);
 		_pressure_dp_start = _debug_vect.x;
 		_pressure_dp_end = _debug_vect.y;
 		// unused _debug_vect.z;
 
+		/*
 		const hrt_abstime now = hrt_absolute_time();
 		int sd_fd = open_sd_file((long) now);
 		const char msg_fmt1[] = " curr_smpl_nb %d\n volume %f ml\n depth %f cm\n";
@@ -263,13 +269,16 @@ void Medusa::parse_mavlink_debug(){
 		snprintf(msg, msg_len-1, msg_fmt3, (double)_pressure_dp_start, (double)_pressure_dp_end);
 		write_to_sd(sd_fd, msg, sizeof(msg));
 		close_sd_file(sd_fd);
+		*/
 	}
 }
 
 void Medusa::parameters_update(bool force)
 {
+	PX4_WARN("parameters_update");
 	// check for parameter updates
 	if (force || _parameter_update_sub.updated()) {
+		PX4_WARN("parameters updating");
 		// clear update
 		parameter_update_s update;
 		_parameter_update_sub.copy(&update);
@@ -301,7 +310,7 @@ $ module start
 )DESCR_STR");
 
 	PRINT_MODULE_USAGE_NAME("module", "medusa");
-	PRINT_MODULE_USAGE_COMMAND("start");
+	PRINT_MODULE_USAGE_COMMAND("start, stop, status");
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 
 	return 0;

@@ -72,9 +72,6 @@ public:
 	/** @see ModuleBase::print_status() */
 	int print_status() override;
 
-	// update internal state, data and param of module
-	void update();
-
 private:
 
 	/**
@@ -120,10 +117,10 @@ private:
 
 	long _timestamp = 0 ;
 
-	// md_status
-	bool _log_sd = false;
-	int _curr_smpl_nb = 0;
-	int _sampling_status = 0;
+	// md_status msgs
+	bool _log_sd = false; // logging on sd card
+	int _curr_smpl_nb = 0; // current sample nb
+	int _sampling_status = 0; // current sample status
 
 	// md_stream
 	float _depth_cm = 0.;
